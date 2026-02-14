@@ -7,6 +7,7 @@ import (
  "strings"
  "net/http"
   "encoding/json"
+  "strconv"
 )
 
 type Event struct {
@@ -62,8 +63,67 @@ func logResponse(username string) {
 
   json.Unmarshal(resp_body, &events)
 
+  commit := 0
+  repo := ""
+  created_repo := ""
+  pr_repo := ""
+  starred := ""
+  fork_name := ""
+  _ = fork_name
+  _ = created_repo
+  _ = pr_repo
+  _ = repo
+  _ = starred
+  visited_cr := false
+  visited_starred := false
+  visited_pr := false
+  visited_fork := false
+
+  
   for _, event := range events {
-    fmt.Print(event)
+    if event.Type == "PushEvent" {
+      if repo == "" {
+        repo = event.Repo.Name
+        commit += 1
+      } else {
+        if repo == event.Repo.Name {
+          commit += 1
+        }
+      }
+    }
+    if event.Payload.Action == "started" && visited_starred == false{
+      starred = event.Repo.Name
+      visited_starred = true
+    }
+    if event.Type == "CreateEvent" && visited_cr == false{
+      created_repo = event.Repo.Name
+      visited_cr = true
+    }
+    if event.Type == "PullRequestEvent" && visited_pr == false {
+      pr_repo = event.Repo.Name
+      visited_pr = true
+    }
+    if event.Type == "ForkEvent" && visited_fork == false {
+      fork_name = event.Repo.Name
+      visited_fork = true
+    }
+  }
+  
+  // logs
+  if repo != "" {
+    fmt.Println(username + " pushed " + strconv.Itoa(commit) + " commits on "+ repo)
+  }
+  if created_repo != "" {
+    fmt.Println(username + " created " + created_repo + " Repository")
+  }
+  if pr_repo != "" {
+    fmt.Println(username + " openend pull request on " + pr_repo)
+  }
+  if starred != "" {
+    fmt.Println(username +" starred " + starred +" Repository")  
+  }
+  if fork_name != "" {
+    fmt.Println(username +" forked " + fork_name + "Repository")
   }
 }
 func main() {
