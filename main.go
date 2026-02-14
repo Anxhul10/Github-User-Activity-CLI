@@ -79,7 +79,7 @@ func logResponse(username string) {
   visited_pr := false
   visited_fork := false
 
-  
+  limiter := 0
   for _, event := range events {
     if event.Type == "PushEvent" {
       if repo == "" {
@@ -90,6 +90,10 @@ func logResponse(username string) {
           commit += 1
         }
       }
+      if limiter >= 10 {
+        break
+      }
+      limiter += 1
     }
     if event.Payload.Action == "started" && visited_starred == false{
       starred = event.Repo.Name
