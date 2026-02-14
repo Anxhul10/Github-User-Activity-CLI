@@ -1,4 +1,4 @@
-module github.com/Anxhul10/Github-User-Activity-CLI
+module github.com/Anxhul10/github-user-activity-cli
 
 go 1.22.2
 
